@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "28531733514",
+    "project_id": "trackbox-3bbc7",
+    "storage_bucket": "trackbox-3bbc7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28531733514:android:0f9d5116f3dbfc3905dbf3",
+        "android_client_info": {
+          "package_name": "com.trackbox.staff"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "28531733514-uul9apgvuj6827urgv6k55l2at9da8uo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRP1RbSfNx17ZlbM-_JJyXPrT9_4xH0uM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "28531733514-uul9apgvuj6827urgv6k55l2at9da8uo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "28531733514-1ud1sa7qtpjkgvph3j0dcfobk39svh28.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.trackbox.student"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28531733514:android:10a663dc8ee8a6e005dbf3",
+        "android_client_info": {
+          "package_name": "com.trackbox.student"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "28531733514-43c0mt1668e6p69e6a7gu3r7ab39f0iu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trackbox.student",
+            "certificate_hash": "12c201b074b3605e06fd9fdef84c75089edf4e2d"
+          }
+        },
+        {
+          "client_id": "28531733514-daaqa0mqh8ou4sglgk8pqmfv8m5qe03t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.trackbox.student",
+            "certificate_hash": "02ec3a935ba0155148d149378b35b597d61d8437"
+          }
+        },
+        {
+          "client_id": "28531733514-uul9apgvuj6827urgv6k55l2at9da8uo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRP1RbSfNx17ZlbM-_JJyXPrT9_4xH0uM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "28531733514-uul9apgvuj6827urgv6k55l2at9da8uo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "28531733514-1ud1sa7qtpjkgvph3j0dcfobk39svh28.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.trackbox.student"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

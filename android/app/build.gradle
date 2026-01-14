@@ -1,0 +1,131 @@
+plugins {
+    id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "com.trackbox.staff"
+    compileSdk 35
+    ndkVersion = "25.1.8937393"
+    packagingOptions {
+        exclude 'lib/**/librecord_linux.so'
+        exclude 'lib/**/librecord_plugin.so'
+    }
+    compileOptions {
+        //flutter_local_notifications
+        coreLibraryDesugaringEnabled true
+
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        applicationId "com.trackbox.staff"
+        minSdkVersion 26
+        targetSdkVersion 34
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        multiDexEnabled true
+
+
+        // ndk {
+        //     abiFilters 'armeabi-v7a','arm64-v8a','x86_64'
+        // }
+
+        // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+// sourceSets {
+//     main {
+//         jniLibs.srcDirs = ['libs']
+//     }
+// }
+
+    signingConfigs {
+        breffniApp {
+            keyAlias 'breffniStaff'
+            keyPassword 'breffniStaff'
+            storeFile file('keystore/keystore.jks')
+            storePassword 'breffniStaff'
+        }
+    }
+
+    buildTypes {
+        release {
+            // signingConfig signingConfigs.release
+//            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.breffniApp
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+//        release {
+//            signingConfig signingConfigs.debug
+//
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//        }
+    }
+}
+
+flutter {
+    source '../..'
+}
+
+
+
+dependencies {
+    // implementation fileTree(dir:'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.10"
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10") {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib'
+    }
+    // Add other dependencies here as needed
+    implementation 'com.google.android.gms:play-services-auth:20.4.0'
+    implementation 'com.google.android.gms:play-services-base:18.0.1'
+
+    //flutter_local_notifications
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+    def multidex_version = "2.0.1"
+
+    implementation "androidx.multidex:multidex:$multidex_version"
+
+    configurations.all {
+        resolutionStrategy {
+            force 'androidx.core:core-ktx:1.13.1'
+            force 'androidx.core:core:1.13.1'
+        }
+    }
+}

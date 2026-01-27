@@ -12,10 +12,12 @@ class NotificationPermissionHandler extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NotificationPermissionHandlerState createState() => _NotificationPermissionHandlerState();
+  _NotificationPermissionHandlerState createState() =>
+      _NotificationPermissionHandlerState();
 }
 
-class _NotificationPermissionHandlerState extends State<NotificationPermissionHandler> {
+class _NotificationPermissionHandlerState
+    extends State<NotificationPermissionHandler> {
   bool _isPermissionGranted = false;
 
   @override
@@ -51,23 +53,26 @@ class _NotificationPermissionHandlerState extends State<NotificationPermissionHa
     return _isPermissionGranted
         ? widget.child
         : Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Notification permission is required',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _requestNotificationPermission,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: const Text('Grant Permission',style: TextStyle(color: Colors.black),),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Notification permission is required',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _requestNotificationPermission,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: const Text(
+                      'Grant Permission',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 }

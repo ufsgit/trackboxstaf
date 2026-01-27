@@ -4,12 +4,12 @@ class HttpUrls {
   // static String baseUrl = 'https://brifniapi.ufstech.in';
   // static String baseUrl = 'http://localhost:3520';
 
-  static String baseUrl = 'https://rw4vb3zj-3520.inc1.devtunnels.ms';
+  static String baseUrl = 'https://rw4vb3zj-3520.inc1.devtunnels.ms/';
 //   static String baseUrl = 'https://igmapi.ufstech.co.in/'; //og
   // static String baseUrl = 'https://9c58-103-214-232-132.ngrok-free.app';
 
   static String imgBaseUrl =
-      'https://ufsnabeelphotoalbum.s3.us-east-2.amazonaws.com/';
+      'https://pub-11714a99f3bd420ca95f23dda2af714b.r2.dev/';
 
   static String login = '/Login/Login_Check';
   static String checkOtp = '/Login/Check_OTP';

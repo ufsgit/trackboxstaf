@@ -9,7 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   VerifyOtpPage(this.email);
-  String email="";
+  String email = "";
 
   @override
   State<VerifyOtpPage> createState() => _VerifyOtpPageState();

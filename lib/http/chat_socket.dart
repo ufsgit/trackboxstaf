@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:breffini_staff/controller/calls_page_controller.dart';
 import 'package:breffini_staff/controller/ongoing_call_controller.dart';
 import 'package:breffini_staff/core/utils/pref_utils.dart';
@@ -14,6 +13,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:breffini_staff/http/notification_service.dart';
+import 'dart:convert';
 
 class ChatSocket {
   static IO.Socket? socket;
@@ -44,20 +45,11 @@ class ChatSocket {
       emitOngoingCalls();
     });
     // Check connection status after a delay
-    // await Future.delayed(const Duration(seconds: 3), () {
-    //   print('Connection status after 5 seconds: ${socket?.connected}');
-    //   if (socket?.connected == false) {
-    //     // print('Socket? options: ${socket?.opts}');
-    //     // print('Socket? id: ${socket?.id}');
-    //   }
-    // });
+
     //end here
 
-    // log('chat log list initialise received');
-    // socket?.emit('get list', {
-    //   "id": teacherId,
-    //   "isStudent": false,
-    // });
+    // chat log list initialise received
+
     socket?.on('chat history', (data) {
       // print('chat history clicked received: $data');
 
@@ -83,20 +75,53 @@ class ChatSocket {
       });
 
       // Print converted map for verification
-      // log('Print converted map for verification>>>>>>>>>>>>>>>>>>');
-      // log(chatMsgController.chatHistoryListMap.toString());
+
       chatMsgController.update();
     });
 
     socket?.on('chat list', (data) async {
-      // print('chat log list clicked received: $data');
+      print('DEBUG: chat log list clicked received: $data');
       // Loader.showLoader();
       List<dynamic> chatLogHistory = data;
       chatLogController.studentChatLogList.value =
           chatLogHistory.map((e) => StudentChatLogModel.fromJson(e)).toList();
-      // print(
-      //     'chat log list after received: ${chatLogController.studentChatLogList}');
+      print(
+          'DEBUG: chat log list after received: ${chatLogController.studentChatLogList}');
+
       chatLogController.update();
+
+      // Trigger Notification for recent unread messages
+      try {
+        for (var item in chatLogHistory) {
+          int unreadCount = 0;
+          if (item['unread_count'] is int) {
+            unreadCount = item['unread_count'];
+          } else if (item['unread_count'] is String) {
+            unreadCount = int.tryParse(item['unread_count']) ?? 0;
+          }
+
+          if (unreadCount > 0) {
+            String? timestampStr = item['timestamp'];
+            if (timestampStr != null) {
+              DateTime msgTime = DateTime.parse(timestampStr).toUtc();
+              DateTime now = DateTime.now().toUtc();
+              // Check if message is within last 2 minutes
+              if (now.difference(msgTime).inMinutes.abs() <= 2) {
+                NotificationService().showNotification(
+                  title: '${item['First_Name']} ${item['Last_Name']}',
+                  body: item['message'] ?? 'New message',
+                  payload: jsonEncode(item),
+                );
+                // Break after notifying for the first relevant message to avoid spam
+                // Or remove break if we want stacked notifications (Android handles grouping usually)
+                break;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        print('DEBUG: Error triggering notification from chat list: $e');
+      }
 
       // Loader.stopLoader();
     });
@@ -104,7 +129,9 @@ class ChatSocket {
     socket?.on(
       'new message',
       (data) async {
-        // print('chat clicked new msg received: ${data['File_Path']}');
+        print('DEBUG: SOCKET NEW MESSAGE RECEIVED: $data');
+        print('DEBUG: MESSAGE CONTENT: ${data['message']}');
+
         SharedPreferences preferences = await SharedPreferences.getInstance();
         String teacherId = preferences.getString('breffini_teacher_Id') ?? '';
 
@@ -130,42 +157,41 @@ class ChatSocket {
         // Format the current date
         String formattedDate = DateFormat('yyyy-MM-dd').format(now);
 
-        log(formattedDate); // Output: 2024-07-22
+        print('DEBUG: Date: $formattedDate'); // Output: 2024-07-22
         if (!chatMsgController.chatHistoryListMap.containsKey(formattedDate)) {
           chatMsgController.chatHistoryListMap[formattedDate] = [];
         }
         chatMsgController.chatHistoryListMap[formattedDate]!.add(newChat);
         chatMsgController.update();
-        log('mark as readddddddddd ${data['isStudent']}');
+        print('DEBUG: mark as read: ${data['isStudent']}');
         socket?.emit('mark as read', {
           "studentId": data['studentId'],
           "teacherId": teacherId,
           "isStudent": data['isStudent'] ?? false,
           "chatType": userTypeId == '2' ? 'teacher_student' : 'hod_student',
         });
-        // chatLogController.getStudentChatLog(); //danger
+
         chatLogController.update();
-        // chatMsgController.update();
+
+        // Trigger Local Notification
+        NotificationService().showNotification(
+          title: 'New Message',
+          body: data['message'] ?? 'You have a new message',
+          payload: jsonEncode(data),
+        );
       },
     );
 
     socket?.on('connect', (_) {
-      // print('Connected to server');
       socket?.emit('send', 'hi');
     });
 
     socket?.emit('send', 'hi');
-    socket?.on('get', (data) {
-      // print('data1111111111111: $data');
-    });
+    socket?.on('get', (data) {});
 
-    socket?.on('connect_error', (data) {
-      // print('Connection error: $data');
-    });
+    socket?.on('connect_error', (data) {});
 
-    socket?.on('error', (data) {
-      // print('Error: $data');
-    });
+    socket?.on('error', (data) {});
   }
 
   static joinConversationRoom(
@@ -196,7 +222,7 @@ class ChatSocket {
   }
 
   static leaveChatLogHistory(String userId, String chatType) {
-    // log('chat log list leaved');
+    // chat log list leaved
     socket?.emit('leave chatlist',
         {"id": userId, "isStudent": false, "chatType": chatType});
   }
@@ -258,8 +284,6 @@ class ChatSocket {
     socket?.on('event', (data) => print(data));
     socket?.onDisconnect((_) => print('Disconnected'));
     socket?.on('fromServer', (_) => print(_));
-
-    // print('connect_last');
   }
 
   //call
@@ -282,44 +306,18 @@ class ChatSocket {
         List<OnGoingCallsModel> onGoingList = dataList
             .map((result) => OnGoingCallsModel.fromJson(result))
             .toList();
-        // chatController.onGoingCallsList.value = onGoingList;
+
         callandChatController.callandChatList.value = dataList
             .map((result) => CallAndChatHistoryModel.fromJson(result))
             .toList();
-        // chatController.searchableCallList.value = onGoingList;
-        // if (!Get.put(CallandChatController()).currentCallModel.value.callId.isNullOrEmpty()) {
-        //   // to handle minimized call disconnect from other device
-        //   AwesomeNotifications().cancelSchedulesByChannelKey("call_channel");
-        //   Get.put(CallandChatController()).disconnectCall();
-        // }
       } else {
-        // ZegoUIKitPrebuiltCallController().minimize.restore(navigatorKey.currentContext!);
-        //
-        // await ZegoUIKitPrebuiltCallController().hangUp(navigatorKey.currentContext!);
-        // //to handle minimised call disconnect from other device
-        // AwesomeNotifications().cancelSchedulesByChannelKey("call_channel");
-        // Get.put(CallandChatController()).disconnectCall(true);
-        //
-        //
         callandChatController.callandChatList.value = [];
-        // chatController.onGoingCallsList.value = [];
-        // chatController.searchableCallList.value = [];
       }
-      // chatController.isLoading.value = false;
     });
   }
 
   //listen current Call
-  void listenCurrentCall(Function(bool, String) callback) {
-    // socket?.on('Call_Status', (data) {
-    //   Map<String, dynamic> dataList = data;
-    //   if (dataList.isNotEmpty) {
-    //     bool isRejected = dataList["is_call_rejected"];
-    //     String id = dataList["id"].toString();
-    //     callback(isRejected, id); // Pass
-    //   }
-    // });
-  }
+  void listenCurrentCall(Function(bool, String) callback) {}
 
   void removeCallStatusListener() {
     socket?.off('Call_Status');

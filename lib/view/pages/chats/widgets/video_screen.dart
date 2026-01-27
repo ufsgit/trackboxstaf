@@ -1,6 +1,5 @@
 import 'dart:io';
 
-
 import 'package:breffini_staff/core/theme/color_resources.dart';
 import 'package:breffini_staff/core/utils/extentions.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +12,11 @@ import 'dart:async';
 
 class VideoViewScreen extends StatefulWidget {
   String videoUrl;
-  String thumbUrl="";
+  String thumbUrl = "";
   bool showAppBar;
 
-  VideoViewScreen({required this.videoUrl,this.showAppBar=true,this.thumbUrl=""});
+  VideoViewScreen(
+      {required this.videoUrl, this.showAppBar = true, this.thumbUrl = ""});
 
   @override
   _VideoViewScreenState createState() => _VideoViewScreenState();
@@ -32,35 +32,32 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
   void initState() {
     super.initState();
     initializePlayer();
-
   }
+
   initializePlayer() async {
-    String sss=widget.videoUrl;
-    File file=File("");
-    if(widget.videoUrl.startsWith("http")) {
+    String sss = widget.videoUrl;
+    File file = File("");
+    if (widget.videoUrl.startsWith("http")) {
       file = await DefaultCacheManager().getSingleFile(widget.videoUrl);
-    }else{
-      file=File(widget.videoUrl);
+    } else {
+      file = File(widget.videoUrl);
     }
 
-
-    if(!widget.videoUrl.startsWith("http") || file.existsSync()){
-      _controller = VideoPlayerController.file(File(file.existsSync()?file.path:widget.videoUrl))
+    if (!widget.videoUrl.startsWith("http") || file.existsSync()) {
+      _controller = VideoPlayerController.file(
+          File(file.existsSync() ? file.path : widget.videoUrl))
         ..initialize().then((_) {
           setState(() {
             _sliderValue = _controller!.value.position.inSeconds.toDouble();
             _controller?.play();
-
           });
         });
-    }else {
-
+    } else {
       _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
         ..initialize().then((_) {
           setState(() {
             _sliderValue = _controller!.value.position.inSeconds.toDouble();
             _controller?.play();
-
           });
         });
     }
@@ -121,39 +118,43 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorResources.colorBlack,
-      appBar: widget.showAppBar?AppBar(
-        backgroundColor: Colors.black,
-        leading: GestureDetector(
-          onTap: () {
-            Get.back();
-          },
-          child: const Icon(
-            Icons.arrow_back_ios,
-            color: ColorResources.colorwhite,
-          ),
-        ),
-        title: Text(
-          'Video',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 16,
-            color: ColorResources.colorwhite,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ):null,
+      appBar: widget.showAppBar
+          ? AppBar(
+              backgroundColor: Colors.black,
+              leading: GestureDetector(
+                onTap: () {
+                  Get.back();
+                },
+                child: const Icon(
+                  Icons.arrow_back_ios,
+                  color: ColorResources.colorwhite,
+                ),
+              ),
+              title: Text(
+                'Video',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  color: ColorResources.colorwhite,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          : null,
       body: GestureDetector(
         onTap: _showControls,
         child: Stack(
           children: [
-            null!= _controller && _controller!.value.isInitialized
+            null != _controller && _controller!.value.isInitialized
                 ? Center(
-              child: AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
-                child: VideoPlayer(_controller!),
-              ),
-            )
+                    child: AspectRatio(
+                      aspectRatio: _controller!.value.aspectRatio,
+                      child: VideoPlayer(_controller!),
+                    ),
+                  )
                 : SizedBox(),
-            if (null!=_controller && _controller!.value.isInitialized && _isControlsVisible)
+            if (null != _controller &&
+                _controller!.value.isInitialized &&
+                _isControlsVisible)
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -185,7 +186,10 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
                           ),
                           IconButton(
                             icon: Icon(
-                              null!=_controller && _controller!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                              null != _controller &&
+                                      _controller!.value.isPlaying
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
                               color: Colors.white,
                               size: 60,
                             ),
@@ -201,21 +205,28 @@ class _VideoViewScreenState extends State<VideoViewScreen> {
                   ),
                 ),
               ),
-            if (null==_controller || !_controller!.value.isInitialized)
+            if (null == _controller || !_controller!.value.isInitialized)
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  if(!widget.thumbUrl.isNullOrEmpty())
-                    widget.thumbUrl.startsWith("http")?
-                    Image.network(widget.thumbUrl,
-                      width: double.infinity,height: double.infinity,
-                      fit: BoxFit.cover,)
-                        :
-                    Image.file(File(widget.thumbUrl),
-                      width: double.infinity,height: double.infinity,
-                      fit: BoxFit.cover,),
+                  if (!widget.thumbUrl.isNullOrEmpty())
+                    widget.thumbUrl.startsWith("http")
+                        ? Image.network(
+                            widget.thumbUrl,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.file(
+                            File(widget.thumbUrl),
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
                   Center(
-                    child: CircularProgressIndicator(color: ColorResources.colorBlue600,),
+                    child: CircularProgressIndicator(
+                      color: ColorResources.colorBlue600,
+                    ),
                   ),
                 ],
               ),

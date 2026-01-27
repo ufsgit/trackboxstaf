@@ -46,8 +46,8 @@ class CustomTextFormField extends StatelessWidget {
       this.borderDecoration,
       this.fillColor,
       this.filled = true,
-        this.onTextChanged ,
-        this.validator});
+      this.onTextChanged,
+      this.validator});
 
   final Alignment? alignment;
 
@@ -127,7 +127,7 @@ class CustomTextFormField extends StatelessWidget {
           maxLines: maxLines ?? 1,
           decoration: decoration,
           validator: validator,
-          onChanged:onTextChanged,
+          onChanged: onTextChanged,
         ),
       );
   InputDecoration get decoration => InputDecoration(

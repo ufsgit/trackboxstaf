@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:breffini_staff/controller/calls_page_controller.dart';
@@ -44,15 +43,9 @@ Future<void> main() async {
     );
 
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
-    await FirebaseMessaging.instance
-        .setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    await NotificationService().initialize();
   } catch (e) {
-    log("Firebase init error: $e");
+    print("DEBUG: Firebase init error: $e");
   }
 
   /// 🔹 Permanent Controllers
@@ -70,11 +63,11 @@ Future<void> main() async {
   try {
     await PrefUtils().init();
   } catch (e) {
-    log("PrefUtils error: $e");
+    print("DEBUG: PrefUtils error: $e");
   }
 
   /// 🔹 Socket init (non-blocking)
-  ChatSocket.initSocket().catchError((e) => log("Socket error: $e"));
+  ChatSocket.initSocket().catchError((e) => print("DEBUG: Socket error: $e"));
 
   runApp(const MyApp());
 }
@@ -108,7 +101,7 @@ class _MyAppState extends State<MyApp> {
             return GetMaterialApp(
               navigatorKey: navigatorKey,
               debugShowCheckedModeBanner: false,
-              title: 'Trackbox Staff',
+              title: 'Happy English-Staff',
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
                 useMaterial3: true,

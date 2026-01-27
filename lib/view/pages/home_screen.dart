@@ -122,9 +122,13 @@ class _HomePageState extends State<HomePage> {
       if (userTypeId == '3') {
         setState(() {
           _isLivePageVisible = false;
-          _pages[4] = const CourseListPage(
-            isFromProfile: false,
-          );
+          // Index 3 is LivePage/Courses in the list [Chats, OneOne, Exams, LivePage, Profile]
+          if (_pages.length > 3) {
+            _pages[3] = const CourseListPage(
+              isFromProfile: false,
+            );
+          }
+
           // _pages.removeAt(3);
         });
       }

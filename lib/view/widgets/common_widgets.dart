@@ -369,14 +369,16 @@ Widget courseProfileWidget(
                 const SizedBox(
                   height: 4,
                 ),
-                Text(
-                  '${batchName}',
-                  style: GoogleFonts.plusJakartaSans(
-                    color: ColorResources.colorgrey600,
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                batchName.isNotEmpty
+                    ? Text(
+                        '$batchName',
+                        style: GoogleFonts.plusJakartaSans(
+                          color: ColorResources.colorgrey600,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                    : const SizedBox(),
                 const SizedBox(
                   height: 4,
                 ),

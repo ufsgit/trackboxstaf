@@ -236,111 +236,6 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Column(
                       children: [
-                        if (!callandChatController.currentCallModel.value.callId
-                                .isNullOrEmpty() &&
-                            callandChatController.audioCallFormatedTime.value !=
-                                "00:00")
-                          Container(
-                              height: 70.h,
-                              margin: const EdgeInsets.all(5),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  // InkWell(
-                                  //   onTap: () async {
-                                  //     ZegoUIKit().turnMicrophoneOn(!ZegoUIKit()
-                                  //         .getMicrophoneStateNotifier(
-                                  //             ZegoUIKit().getLocalUser().id)
-                                  //         .value);
-                                  //   },
-                                  //   child: Padding(
-                                  //     padding: const EdgeInsets.all(0.0),
-                                  //     child: Card(
-                                  //       shape: RoundedRectangleBorder(
-                                  //           borderRadius:
-                                  //               BorderRadius.circular(50)),
-                                  //       child: Padding(
-                                  //         padding: const EdgeInsets.all(8.0),
-                                  //         child: Icon(
-                                  //           ZegoUIKit()
-                                  //                   .getMicrophoneStateNotifier(
-                                  //                       ZegoUIKit()
-                                  //                           .getLocalUser()
-                                  //                           .id)
-                                  //                   .value
-                                  //               ? Icons.mic
-                                  //               : Icons.mic_off,
-                                  //           color: Colors.red,
-                                  //         ),
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                  InkWell(
-                                    onTap: () {
-                                      // ZegoUIKitPrebuiltCallController()
-                                      //     .minimize
-                                      //     .restore(context);
-                                    },
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        const Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Icon(
-                                            Icons.call,
-                                            color: Colors.green,
-                                          ),
-                                        ),
-                                        Text(
-                                          "${callandChatController.currentCallModel.value.callerName!}   ${callandChatController.audioCallFormatedTime.value}",
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.plusJakartaSans(
-                                            color: Colors.green,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () async {
-                                      // await ZegoUIKit().leaveRoom();
-                                      CallandChatController callChatController =
-                                          Get.find();
-                                      callChatController.disconnectCall(
-                                          true,
-                                          false,
-                                          callChatController
-                                              .currentCallModel.value.callerId!,
-                                          callChatController.currentCallModel
-                                                  .value.callId ??
-                                              "");
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(0.0),
-                                      child: Card(
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(50)),
-                                        child: const Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: Icon(
-                                            Icons.call_end,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              )),
                         Expanded(child: _pages.elementAt(_selectedIndex)),
                       ],
                     ),
@@ -394,7 +289,7 @@ class _HomePageState extends State<HomePage> {
                       : 'assets/images/ic_connect.svg',
                 ),
               ),
-              label: 'One-one',
+              label: 'Students',
             ),
             BottomNavigationBarItem(
               icon: Icon(
@@ -467,9 +362,8 @@ class _HomePageState extends State<HomePage> {
         payLoad = jsonDecode(response.payload!);
         handleNotificationClick(payLoad);
       }
-      // handle interaction when app is active for android
-      // handleMessage(message,context);
     });
+
     FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
     if (!kIsWeb) {
@@ -481,6 +375,7 @@ class _HomePageState extends State<HomePage> {
         importance: Importance.max,
       );
     }
+
     if (Platform.isIOS) {
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
@@ -499,58 +394,9 @@ class _HomePageState extends State<HomePage> {
       firebaseMessaging.subscribeToTopic("TCR-${PrefUtils().getTeacherId()}");
     }
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("");
-      showFlutterNotification(message);
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      Map<String, dynamic> data = message.data;
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-      AppleNotification? apple = message.notification?.apple;
-      String imgUrl = "";
-
-      if (notification != null) {
-        if (null != android && !android.imageUrl.isNullOrEmpty()) {
-          imgUrl = android.imageUrl ?? "";
-        }
-        if (null != apple && !apple.imageUrl.isNullOrEmpty()) {
-          imgUrl = apple.imageUrl ?? "";
-        }
-        Map<String, dynamic> newData1 = {
-          'body': notification.body,
-          'title': notification.title,
-          'imageUrl': imgUrl,
-        };
-        data.addAll(newData1);
-        handleNotificationClick(data);
-      }
-    });
-    //This method will call when the app is in kill state
-    FirebaseMessaging.instance.getInitialMessage().then((message) {
-      RemoteNotification? notification = message?.notification;
-      AndroidNotification? android = message?.notification?.android;
-      AppleNotification? apple = message?.notification?.apple;
-      String imgUrl = "";
-
-      if (notification != null) {
-        if (null != android && !android.imageUrl.isNullOrEmpty()) {
-          imgUrl = android.imageUrl ?? "";
-        }
-        if (null != apple && !apple.imageUrl.isNullOrEmpty()) {
-          imgUrl = apple.imageUrl ?? "";
-        }
-        Map<String, dynamic> data = message!.data;
-        Map<String, dynamic> newData1 = {
-          'body': notification.body,
-          'title': notification.title,
-          'imageUrl': imgUrl,
-        };
-        data.addAll(newData1);
-        handleNotificationClick(data);
-      }
-    });
+    // NOTE: FCM message listeners (onMessage, onMessageOpenedApp, getInitialMessage)
+    // are now handled centrally in NotificationService to avoid conflicts.
+    // See lib/http/notification_service.dart for the implementation.
   }
 
   handleNotificationClick(Map<String, dynamic> payLoad) async {

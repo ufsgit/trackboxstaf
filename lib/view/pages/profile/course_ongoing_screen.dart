@@ -103,8 +103,7 @@ class _CourseOngoingScreenState extends State<CourseOngoingScreen> {
                                       'One on one Teacher : ${studentCourseController.studentCourseList[index].oneToOneTeacher}',
                                   courseName: studentCourseController
                                       .studentCourseList[index].courseName,
-                                  batchName:
-                                      'Course Completion : ${studentCourseController.studentCourseList[index].courseCompletionPercentage.toString()}%',
+                                  batchName: "",
                                   image: HttpUrls.imgBaseUrl +
                                       studentCourseController
                                           .studentCourseList[index].imagePath,

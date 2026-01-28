@@ -241,10 +241,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                           child: profileTileWidget(
                             name: 'Assigned Batches',
+                            svgIcon: 'assets/images/ic_connect.svg',
                             onPressed: () {
                               Get.to(() => const BatchScreen());
                             },
-                            svgIcon: 'assets/images/ic_connect.svg',
                           ),
                         ),
 

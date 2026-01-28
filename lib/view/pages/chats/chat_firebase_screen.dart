@@ -9,7 +9,7 @@ import 'package:breffini_staff/controller/profile_controller.dart';
 import 'package:breffini_staff/core/theme/color_resources.dart';
 import 'package:breffini_staff/core/theme/custom_text_style.dart';
 import 'package:breffini_staff/controller/chat_firebase_controller.dart';
-import 'package:breffini_staff/core/utils/common_utils.dart';
+
 import 'package:breffini_staff/core/utils/extentions.dart';
 import 'package:breffini_staff/core/utils/file_utils.dart';
 import 'package:breffini_staff/core/utils/key_center.dart';
@@ -20,8 +20,7 @@ import 'package:breffini_staff/http/chat_socket.dart';
 import 'package:breffini_staff/model/chat_message_model.dart';
 import 'package:breffini_staff/model/student_chat_model.dart';
 import 'package:breffini_staff/view/pages/calls/incoming_call_screen.dart';
-import 'package:breffini_staff/view/pages/calls/widgets/google_meet.dart';
-import 'package:breffini_staff/view/pages/calls/widgets/handle_new_call.dart';
+
 import 'package:breffini_staff/view/pages/chats/image_viewer_screen.dart';
 import 'package:breffini_staff/view/pages/chats/widgets/common_widgets.dart';
 import 'package:breffini_staff/view/pages/chats/widgets/video_screen.dart';
@@ -328,6 +327,22 @@ class _ChatFireBaseScreenState extends State<ChatFireBaseScreen> {
             studentId: widget.studentId,
             profileUrl: widget.profileUrl,
             studentName: widget.studentName,
+            onAvatarTap: widget.isDeletedUser
+                ? () {
+                    Get.showSnackbar(const GetSnackBar(
+                      message: 'This user is deleted',
+                      duration: Duration(milliseconds: 2000),
+                    ));
+                  }
+                : () {
+                    Get.to(() => ProfileViewPage(
+                          courseId: widget.courseId,
+                          studentId: widget.studentId,
+                          contactDetails: widget.contactDetails,
+                          profileUrl: widget.profileUrl,
+                          studentName: widget.studentName,
+                        ));
+                  },
             // onAudioTap: widget.isDeletedUser
             //     ? () {
             //         Get.showSnackbar(const GetSnackBar(
@@ -362,70 +377,7 @@ class _ChatFireBaseScreenState extends State<ChatFireBaseScreen> {
             //           });
             //         }
             //       },
-            onAudioTap: PrefUtils().getMeetLink().isNotEmpty
-                ? () async {
-                    await handleCall(
-                      studentId: widget.studentId.toString(),
-                      studentName: widget.studentName,
-                      callId: '',
-                      isVideo: true,
-                      profileImageUrl: widget.profileUrl,
-                      liveLink: PrefUtils().getMeetLink(),
-                      controller: controller,
-                      callandChatController: callandChatController,
-                      safeBack: safeBack,
-                    );
-                    setState(() {});
 
-                    MeetCallTracker(
-                      onCallEnded: () {},
-                    ).startMeetCall(meetCode: PrefUtils().getMeetLink());
-                  }
-                : () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text(
-                            'Create a google meet link to initiate call')));
-                  },
-            onAvatarTap: widget.isDeletedUser
-                ? () {
-                    Get.showSnackbar(const GetSnackBar(
-                      message: 'This user is deleted',
-                      duration: Duration(milliseconds: 2000),
-                    ));
-                  }
-                : () {
-                    Get.to(() => ProfileViewPage(
-                          courseId: widget.courseId,
-                          studentId: widget.studentId,
-                          contactDetails: widget.contactDetails,
-                          profileUrl: widget.profileUrl,
-                          studentName: widget.studentName,
-                        ));
-                  },
-            onVideoTap: PrefUtils().getMeetLink().isNotEmpty
-                ? () async {
-                    await handleCall(
-                      studentId: widget.studentId.toString(),
-                      studentName: widget.studentName,
-                      callId: '',
-                      isVideo: true,
-                      profileImageUrl: widget.profileUrl,
-                      liveLink: PrefUtils().getMeetLink(),
-                      controller: controller,
-                      callandChatController: callandChatController,
-                      safeBack: safeBack,
-                    );
-                    setState(() {});
-
-                    MeetCallTracker(
-                      onCallEnded: () {},
-                    ).startMeetCall(meetCode: PrefUtils().getMeetLink());
-                  }
-                : () {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text(
-                            'Create a google meet link to initiate call')));
-                  },
             // onVideoTap: widget.isDeletedUser
             //     ? () {
             //         Get.showSnackbar(const GetSnackBar(

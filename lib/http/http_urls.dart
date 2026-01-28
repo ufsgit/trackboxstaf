@@ -4,7 +4,7 @@ class HttpUrls {
   // static String baseUrl = 'https://brifniapi.ufstech.in';
   // static String baseUrl = 'http://localhost:3520';
 
-  static String baseUrl = 'https://rw4vb3zj-3520.inc1.devtunnels.ms/';
+  static String baseUrl = 'https://rw4vb3zj-3515.inc1.devtunnels.ms';
 //   static String baseUrl = 'https://igmapi.ufstech.co.in/'; //og
   // static String baseUrl = 'https://9c58-103-214-232-132.ngrok-free.app';
 
@@ -82,4 +82,7 @@ class HttpUrls {
       '/teacher/Get_Teacher_Experience_By_TeacherID/';
   static String deleteTeacherExperience = '/teacher/Delete_Teacher_Experience/';
   static String editTeacherExperience = '/teacher/Edit_Teacher_Experience';
+
+  // Exam Results
+  static String getExamResults = '/student/Get_Exam_Results/';
 }

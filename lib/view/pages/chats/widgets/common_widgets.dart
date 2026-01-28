@@ -20,8 +20,6 @@ Widget buildAppBar({
   required String studentName,
   required String profileUrl,
   required String studentId,
-  void Function()? onVideoTap,
-  void Function()? onAudioTap,
   void Function()? onAvatarTap,
   required String usertype,
 }) {
@@ -129,49 +127,6 @@ Widget buildAppBar({
             ),
           ),
           const Expanded(child: SizedBox()),
-          Row(
-            children: [
-              InkWell(
-                onTap: onAudioTap,
-                child: const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Icon(
-                    CupertinoIcons.phone,
-                    size: 18,
-                    color: ColorResources.colorgrey700,
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 12.w,
-              ),
-              InkWell(
-                onTap: onVideoTap,
-                child: const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: Icon(
-                    CupertinoIcons.videocam,
-                    size: 24,
-                    color: ColorResources.colorgrey700,
-                  ),
-                ),
-              ),
-              // SizedBox(
-              //   width: 12.w,
-              // ),
-              // const SizedBox(
-              //   width: 24,
-              //   height: 24,
-              //   child: Icon(
-              //     Icons.more_vert,
-              //     size: 18,
-              //     color: ColorResources.colorgrey700,
-              //   ),
-              // ),
-            ],
-          ),
         ],
       ),
     ),
@@ -415,7 +370,9 @@ Widget buildMessageSection({
                       height: 38.h,
                       width: 38.h,
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                      child: CircularProgressIndicator(color: ColorResources.colorBlue600,),
+                      child: CircularProgressIndicator(
+                        color: ColorResources.colorBlue600,
+                      ),
                     )
                   :
                   // Send button

@@ -12,12 +12,14 @@ import 'package:breffini_staff/controller/ongoing_call_controller.dart';
 import 'package:breffini_staff/controller/profile_controller.dart';
 import 'package:breffini_staff/core/utils/extentions.dart';
 import 'package:breffini_staff/core/utils/firebase_utils.dart';
+import 'package:breffini_staff/core/utils/file_utils.dart';
 import 'package:breffini_staff/core/utils/pref_utils.dart';
 import 'package:breffini_staff/firebase_options.dart';
 import 'package:breffini_staff/http/chat_socket.dart';
 import 'package:breffini_staff/http/http_urls.dart';
 import 'package:breffini_staff/model/ongoing_call_model.dart';
 import 'package:breffini_staff/view/pages/calls/incoming_call_screen.dart';
+import 'package:breffini_staff/view/pages/chats/chat_firebase_screen.dart';
 import 'package:breffini_staff/view/pages/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -82,11 +84,20 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
           Get.put(CallandChatController()).listenIncomingCallNotification();
         }
       }
+    } else if (type == "new_message" || type == "chat") {
+      // Chat Message Handling
+      // OS automatically shows the notification from 'notification' payload
+      // We just log it here for debugging
+      print("DEBUG: Chat message received in background");
+      print(
+          "DEBUG: Sender: ${payload['senderName'] ?? payload['Caller_Name'] ?? 'Unknown'}");
+      print("DEBUG: Message ID: ${message.messageId}");
+      // Optional: Update local database, increment badge count, etc.
     } else {
-      // C. Normal Notification Logic
+      // C. Other Notification Types
       // Android automatically shows the notification if "notification" payload exists.
-      // We do NOT need to show a local notification here manually.
       print("DEBUG: Background Message: ${message.messageId}");
+      print("DEBUG: Type: $type");
     }
   } catch (e, stackTrace) {
     print("DEBUG: Error in background message handler: $e");
@@ -346,13 +357,13 @@ class NotificationService {
 
   void _configureForegroundOptions() async {
     // This controls how FCM handles the "notification" payload while app is in foreground.
-    // We set these to false so we can MANUALLY show the local notification via flutter_local_notifications
-    // for better control (heads-up display etc).
+    // For Android: We set to false and manually show via flutter_local_notifications for better control
+    // For iOS: We enable alert/badge/sound for better user experience
     await FirebaseMessaging.instance
         .setForegroundNotificationPresentationOptions(
-      alert: false,
-      badge: false,
-      sound: false,
+      alert: true, // iOS will show banner in foreground
+      badge: true, // iOS will update badge count
+      sound: true, // iOS will play sound
     );
   }
 
@@ -577,19 +588,69 @@ class NotificationService {
     });
   }
 
-  void _handleNotificationTap(String? payload) {
+  void _handleNotificationTap(String? payload) async {
     if (payload != null) {
       try {
         Map<String, dynamic> data = jsonDecode(payload);
         String? type = data['type'];
+
+        print("DEBUG: Notification tapped with type: $type");
+        print("DEBUG: Payload: $data");
+
         if (type == 'new_message' || type == 'chat') {
-          // Navigate to Chat
-          // Ensure you handle the context correctly, Get.to works if GetMaterialApp is set up
+          // Navigate to specific chat screen
+          String senderId = data['sender_id']?.toString() ??
+              data['studentId']?.toString() ??
+              data['id']?.toString() ??
+              '';
+          String senderName = data['senderName']?.toString() ??
+              data['Caller_Name']?.toString() ??
+              'Unknown';
+          String profileUrl = data['profileUrl']?.toString() ??
+              data['Profile_Photo_Img']?.toString() ??
+              data['thumbUrl']?.toString() ??
+              '';
+          String courseId = data['course_id']?.toString() ?? '0';
+
+          if (senderId.isNotEmpty) {
+            print("DEBUG: Navigating to chat with student: $senderId");
+
+            // Get userTypeId from SharedPreferences (same as home_screen.dart)
+            final prefs = await SharedPreferences.getInstance();
+            String userTypeId = prefs.getString('user_type_id') ?? '2';
+
+            // Validate profileUrl using FileUtils (same as home_screen.dart)
+            String validatedProfileUrl =
+                FileUtils.getFileExtension(profileUrl).isNullOrEmpty()
+                    ? ""
+                    : profileUrl;
+
+            // Navigate using the same pattern as home_screen.dart handleNotificationClick
+            Get.to(() => ChatFireBaseScreen(
+                  isDeletedUser: false,
+                  studentId: senderId,
+                  profileUrl: validatedProfileUrl,
+                  studentName: senderName,
+                  contactDetails: "",
+                  courseId: userTypeId == '2' ? '0' : '${courseId}Hod',
+                  userType: userTypeId,
+                ));
+          } else {
+            print("DEBUG: Missing sender ID, navigating to home");
+            Get.to(() => HomePage());
+          }
+        } else if (type == 'new_call') {
+          // Navigate to calls page
+          print("DEBUG: Call notification tapped");
+          Get.to(() => HomePage());
+        } else {
+          // Default navigation
           Get.to(() => HomePage());
         }
-        // Add other navigation logic here
       } catch (e) {
         print("DEBUG: Error parsing payload: $e");
+        // Fallback navigation
+        Get.to(() => HomePage());
       }
     }
   }

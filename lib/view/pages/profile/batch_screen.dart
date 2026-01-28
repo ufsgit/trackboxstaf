@@ -121,7 +121,9 @@ class _BatchScreenState extends State<BatchScreen> {
                               itemBuilder: (context, index) {
                                 return batchOfTeacherWidget(
                                     badgeColor: (profileController.getBatchesOfTeacher[index].hasBatch == 1 &&
-                                            profileController.getBatchesOfTeacher[index].hasOneOnOne ==
+                                            profileController
+                                                    .getBatchesOfTeacher[index]
+                                                    .hasOneOnOne ==
                                                 1)
                                         ? const Color.fromARGB(
                                             255, 128, 128, 128)
@@ -133,8 +135,7 @@ class _BatchScreenState extends State<BatchScreen> {
                                             : (profileController.getBatchesOfTeacher[index].hasBatch == 1 &&
                                                     profileController.getBatchesOfTeacher[index].hasOneOnOne ==
                                                         0)
-                                                ? const Color.fromARGB(
-                                                    255, 255, 38, 38)
+                                                ? Colors.transparent
                                                 : Colors.transparent,
                                     badgeText: (profileController.getBatchesOfTeacher[index].hasBatch == 1 &&
                                             profileController
@@ -148,7 +149,7 @@ class _BatchScreenState extends State<BatchScreen> {
                                             ? 'One-one'
                                             : (profileController.getBatchesOfTeacher[index].hasBatch == 1 &&
                                                     profileController.getBatchesOfTeacher[index].hasOneOnOne == 0)
-                                                ? 'Live'
+                                                ? ''
                                                 : '',
                                     icon: profileController.getBatchesOfTeacher[index].batchIDs != null ? Icons.group : Icons.person,
                                     iconColor: ColorResources.colorwhite,

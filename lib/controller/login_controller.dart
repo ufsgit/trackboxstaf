@@ -56,11 +56,21 @@ class LoginController extends GetxController {
     }
   }
 
-  Future<void> getFCMToken() async {
+  Future<void> getFCMToken({bool forceRefresh = false}) async {
     // Ensure the function returns a Future and uses async/await
     try {
+      if (forceRefresh) {
+        // Delete the old token first to force a refresh
+        print('DEBUG: Deleting old FCM token...');
+        await FirebaseMessaging.instance.deleteToken();
+
+        // Wait a bit for the deletion to complete
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+
+      // Get a fresh token
       String? token = await FirebaseMessaging.instance.getToken();
-      print('print token $token');
+      print('DEBUG: FCM Token obtained: $token');
       fcmToken = token ?? "";
       log('fmcToken  $fcmToken');
     } catch (e) {
@@ -69,8 +79,13 @@ class LoginController extends GetxController {
   }
 
   Future<void> teacherLogin(TeacherLoginModel teacher) async {
-    // Wait for the token to be retrieved before proceeding
-    await getFCMToken();
+    // Force refresh the FCM token to ensure we get a new one for this login
+    // This is critical when logging in after a logout to ensure notifications
+    // go to the correct user
+    print('DEBUG: Login started - Force refreshing FCM token...');
+    await getFCMToken(forceRefresh: true);
+    print('DEBUG: New FCM token ready for login');
+
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
     Map<String, dynamic> jsonData = {
@@ -238,6 +253,8 @@ class LoginController extends GetxController {
   }
 
   void logout() async {
+    print('DEBUG: Logout started...');
+
     FirebaseFirestore.instance.clearPersistence();
     FirebaseFirestore.instance.terminate();
     CallandChatController callOngoingController = Get.find();
@@ -262,13 +279,30 @@ class LoginController extends GetxController {
       await FlutterCallkitIncoming.endCall(callId);
     }
 
+    // Unsubscribe from FCM topic
+    print('DEBUG: Unsubscribing from topic: TCR-${PrefUtils().getTeacherId()}');
     FirebaseMessaging.instance
         .unsubscribeFromTopic("TCR-" + PrefUtils().getTeacherId());
 
+    // CRITICAL: Delete the FCM token to prevent notifications going to the wrong user
+    // This ensures that when a new user logs in, they get a fresh token
+    try {
+      print('DEBUG: Deleting FCM token on logout...');
+      await FirebaseMessaging.instance.deleteToken();
+      print('DEBUG: FCM token deleted successfully');
+    } catch (e) {
+      print('DEBUG: Error deleting FCM token: $e');
+    }
+
+    // Clear local storage
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.remove('breffini_token');
     await preferences.remove('breffini_teacher_Id');
+    await preferences.remove('user_type_id'); // Also clear user type
+
     isLoggedIn.value = false;
+    print('DEBUG: Logout complete, navigating to login page');
+
     // await Get.delete(force: true);
 
     Get.offAll(() => const LoginPage());

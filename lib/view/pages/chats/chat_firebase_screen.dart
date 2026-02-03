@@ -14,7 +14,7 @@ import 'package:breffini_staff/core/utils/extentions.dart';
 import 'package:breffini_staff/core/utils/file_utils.dart';
 import 'package:breffini_staff/core/utils/key_center.dart';
 import 'package:breffini_staff/core/utils/pref_utils.dart';
-import 'package:breffini_staff/http/aws_upload.dart';
+import 'package:breffini_staff/http/cloud_flare_upload.dart';
 import 'package:breffini_staff/http/http_urls.dart';
 import 'package:breffini_staff/http/chat_socket.dart';
 import 'package:breffini_staff/model/chat_message_model.dart';
@@ -295,22 +295,18 @@ class _ChatFireBaseScreenState extends State<ChatFireBaseScreen> {
 
   String _formatDateHeader(DateTime date) {
     final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-    final isToday =
-        date.day == now.day && date.month == now.month && date.year == now.year;
-    final isYesterday = date.day == now.day - 1 &&
-        date.month == now.month &&
-        date.year == now.year;
-    final isThisWeek = date.isAfter(startOfWeek);
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final dateToCheck = DateTime(date.year, date.month, date.day);
 
-    if (isToday) {
+    if (dateToCheck == today) {
       return 'Today';
-    } else if (isYesterday) {
+    } else if (dateToCheck == yesterday) {
       return 'Yesterday';
-    } else if (isThisWeek) {
+    } else if (now.difference(date).inDays < 7) {
       return DateFormat('EEEE').format(date);
     } else {
-      return DateFormat('MMMM dd, yyyy').format(date);
+      return DateFormat('dd MMM yyyy').format(date);
     }
   }
 
@@ -1310,6 +1306,7 @@ class _ChatFireBaseScreenState extends State<ChatFireBaseScreen> {
                       selectedFile != null, selectedFile ?? File(""));
                   chatController.isSendingMessage.value = false;
                 } else {
+                  // Voice recording logic
                   if (recorderAudioFile == null ||
                       recorderAudioFile!.path.isNullOrEmpty()) {
                     chatController.isMicOn.value =
@@ -1324,83 +1321,87 @@ class _ChatFireBaseScreenState extends State<ChatFireBaseScreen> {
                   } else {
                     _stopTimer();
                     await stopRecording(false);
-                    chatController.isSendingMessage.value = true;
-                    await sendMessage(true, recorderAudioFile!);
-                    chatController.isSendingMessage.value = false;
+                    // Ensure file exists before sending
+                    if (recorderAudioFile != null &&
+                        recorderAudioFile!.existsSync()) {
+                      chatController.isSendingMessage.value = true;
+                      await sendMessage(true, recorderAudioFile!);
+                      chatController.isSendingMessage.value = false;
+                    }
                   }
-
-                  // // Check if there's an audio file to send
-                  // if (selectedFile != null || audioFile != null) {
-                  //   print('fgdf2');
-                  //   File file = File(selectedFile?.path ?? audioFile!.path);
-                  //
-                  //   String? uploadKey = await AwsUpload.uploadChatImageToAws(
-                  //     file,
-                  //     widget.studentId,
-                  //     await SharedPreferences.getInstance().then((prefs) =>
-                  //         prefs.getString('breffini_teacher_Id') ?? "0"),
-                  //     selectedFile?.extension ?? p.extension(audioFile!.path),
-                  //   );
-                  //
-                  //   if (uploadKey != null) {
-                  //     final filePath = uploadKey;
-                  //     widget.userType == '2'
-                  //         ? await chatController.uploadFileAndSendMessage(
-                  //             _messageController.text,
-                  //             widget.studentId,
-                  //             selectedFile?.path ?? audioFile!.path,
-                  //             selectedFile?.extension ??
-                  //                 p.extension(audioFile!.path))
-                  //         : await chatController.uploadFileAndSendMessageofHod(
-                  //             _messageController.text,
-                  //             widget.studentId,
-                  //             widget.courseId.toString(),
-                  //             selectedFile?.path ?? audioFile!.path,
-                  //             selectedFile?.extension ??
-                  //                 p.extension(audioFile!.path));
-                  //
-                  //     SharedPreferences preferences =
-                  //         await SharedPreferences.getInstance();
-                  //     String teacherId =
-                  //         preferences.getString('breffini_teacher_Id') ?? '';
-                  //     String courseIdString = widget.courseId;
-                  //     int courseId = int.parse(
-                  //         RegExp(r'\d+').stringMatch(courseIdString)!);
-                  //     log("////////courseIDDDDDDDDD$courseId");
-                  //
-                  //     StudentChatModel studentMsg = StudentChatModel(
-                  //       courseId: courseId,
-                  //       chatType: widget.userType == '2'
-                  //           ? 'teacher_student'
-                  //           : 'hod_student',
-                  //       teacherId: int.parse(teacherId),
-                  //       studentId: int.parse(widget.studentId),
-                  //       chatMessage: _messageController.text.trim(),
-                  //       sentTime: DateTime.now().toString(),
-                  //       isStudent: false,
-                  //       filePath: filePath,
-                  //       senderName:  widget.userType == '2' ? PrefUtils().getTeacherName(): "HOD", // sanju told idea
-                  //       profileUrl: HttpUrls.imgBaseUrl+PrefUtils().getProfileUrl(),
-                  //
-                  //
-                  //     );
-                  //
-                  //     ChatSocket.startChatting(studentMsg);
-                  //     _messageController.clear();
-                  //
-                  //     // String userTypeId =
-                  //     //     preferences.getString('user_type_id') ?? '2';
-                  //     // log('teacher id $teacherId');
-                  //     // ChatbotSocket.getChatLogHistory(
-                  //     //     teacherId,
-                  //     //     userTypeId == '2'
-                  //     //         ? 'teacher_student'
-                  //     //         : 'hod_student');
-                  //   } else {
-                  //     log('Error uploading image');
-                  //   }
-                  // }
                 }
+
+                // // Check if there's an audio file to send
+                // if (selectedFile != null || audioFile != null) {
+                //   print('fgdf2');
+                //   File file = File(selectedFile?.path ?? audioFile!.path);
+                //
+                //   String? uploadKey = await AwsUpload.uploadChatImageToAws(
+                //     file,
+                //     widget.studentId,
+                //     await SharedPreferences.getInstance().then((prefs) =>
+                //         prefs.getString('breffini_teacher_Id') ?? "0"),
+                //     selectedFile?.extension ?? p.extension(audioFile!.path),
+                //   );
+                //
+                //   if (uploadKey != null) {
+                //     final filePath = uploadKey;
+                //     widget.userType == '2'
+                //         ? await chatController.uploadFileAndSendMessage(
+                //             _messageController.text,
+                //             widget.studentId,
+                //             selectedFile?.path ?? audioFile!.path,
+                //             selectedFile?.extension ??
+                //                 p.extension(audioFile!.path))
+                //         : await chatController.uploadFileAndSendMessageofHod(
+                //             _messageController.text,
+                //             widget.studentId,
+                //             widget.courseId.toString(),
+                //             selectedFile?.path ?? audioFile!.path,
+                //             selectedFile?.extension ??
+                //                 p.extension(audioFile!.path));
+                //
+                //     SharedPreferences preferences =
+                //         await SharedPreferences.getInstance();
+                //     String teacherId =
+                //         preferences.getString('breffini_teacher_Id') ?? '';
+                //     String courseIdString = widget.courseId;
+                //     int courseId = int.parse(
+                //         RegExp(r'\d+').stringMatch(courseIdString)!);
+                //     log("////////courseIDDDDDDDDD$courseId");
+                //
+                //     StudentChatModel studentMsg = StudentChatModel(
+                //       courseId: courseId,
+                //       chatType: widget.userType == '2'
+                //           ? 'teacher_student'
+                //           : 'hod_student',
+                //       teacherId: int.parse(teacherId),
+                //       studentId: int.parse(widget.studentId),
+                //       chatMessage: _messageController.text.trim(),
+                //       sentTime: DateTime.now().toString(),
+                //       isStudent: false,
+                //       filePath: filePath,
+                //       senderName:  widget.userType == '2' ? PrefUtils().getTeacherName(): "HOD", // sanju told idea
+                //       profileUrl: HttpUrls.imgBaseUrl+PrefUtils().getProfileUrl(),
+                //
+                //
+                //     );
+                //
+                //     ChatSocket.startChatting(studentMsg);
+                //     _messageController.clear();
+                //
+                //     // String userTypeId =
+                //     //     preferences.getString('user_type_id') ?? '2';
+                //     // log('teacher id $teacherId');
+                //     // ChatbotSocket.getChatLogHistory(
+                //     //     teacherId,
+                //     //     userTypeId == '2'
+                //     //         ? 'teacher_student'
+                //     //         : 'hod_student');
+                //   } else {
+                //     log('Error uploading image');
+                //   }
+                // }
 
                 setState(() {
                   selectedFile = null; // Reset the selected file
@@ -1557,7 +1558,7 @@ class _ChatFireBaseScreenState extends State<ChatFireBaseScreen> {
         // generate thumbnail
         String thumbnailFilePath =
             await FileUtils.generateThumbnail(selectedFile!.path!);
-        thumbUrl = await AwsUpload.uploadChatImageToAws(
+        thumbUrl = await CloudFlareUpload.uploadChatImageToCloudFlare(
           File(thumbnailFilePath),
           widget.studentId,
           teacherId,

@@ -71,7 +71,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 1,
       child: SafeArea(
         child: Scaffold(
           backgroundColor: ColorResources.colorwhite,
@@ -154,17 +154,6 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                 ),
               ),
               SizedBox(
-                height: 4.h,
-              ),
-              Text(
-                widget.contactDetails,
-                style: GoogleFonts.plusJakartaSans(
-                  color: ColorResources.colorgrey500,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              SizedBox(
                 height: 16.h,
               ),
               //  studentCourseController.studentCourseList.isNotEmpty
@@ -241,8 +230,6 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                   padding: const EdgeInsets.only(bottom: 12),
                   tabs: const [
                     Tab(text: 'Courses'),
-                    Tab(text: 'Media'),
-                    // Tab(text: 'Call History'),
                   ],
                   labelStyle: GoogleFonts.plusJakartaSans(
                     fontSize: 14.sp,
@@ -263,12 +250,6 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
                       isFromBatch: false,
                       studentId: widget.studentId,
                     ),
-                    StudentMediaScreen(
-                      studentId: widget.studentId,
-                    ),
-                    // CallLogScreen(
-                    //   studentId: widget.studentId,
-                    // ),
                   ],
                 ),
               ),

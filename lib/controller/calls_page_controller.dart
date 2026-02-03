@@ -1,37 +1,30 @@
 import 'dart:async';
-import 'dart:convert';
 
 // import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:breffini_staff/controller/individual_call_controller.dart';
 import 'package:breffini_staff/controller/live_controller.dart';
-import 'package:breffini_staff/core/utils/FirebaseCallModel.dart';
+
 import 'package:breffini_staff/core/utils/common_utils.dart';
 import 'package:breffini_staff/core/utils/extentions.dart';
 import 'package:breffini_staff/core/utils/firebase_utils.dart';
-import 'package:breffini_staff/core/utils/key_center.dart';
-import 'package:breffini_staff/core/utils/pref_utils.dart';
+
 import 'package:breffini_staff/http/http_requests.dart';
 import 'package:breffini_staff/http/http_urls.dart';
-import 'package:breffini_staff/http/notification_service.dart';
-import 'package:breffini_staff/main.dart';
+
 import 'package:breffini_staff/model/current_call_model.dart';
 import 'package:breffini_staff/model/get_student_timeslot_model.dart';
 import 'package:breffini_staff/model/student_course_model.dart';
 import 'package:breffini_staff/model/student_list_model.dart';
 import 'package:breffini_staff/model/teacher_calls_history_model.dart';
-import 'package:breffini_staff/view/pages/calls/incoming_call_screen.dart';
+
 import 'package:breffini_staff/view/pages/calls/widgets/google_meet.dart';
 import 'package:breffini_staff/view/pages/calls/widgets/handle_new_call.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_callkit_incoming_yoer/entities/call_event.dart';
 import 'package:flutter_callkit_incoming_yoer/flutter_callkit_incoming.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:flutter/scheduler.dart' as scheduler;
+import 'package:get/get.dart';
 
 CallandChatController getCallChatController() {
   try {
@@ -206,8 +199,8 @@ class CallandChatController extends GetxController {
     audioCallFormatedTime.value =
         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    showCallNotification(
-        audioCallFormatedTime.value, currentCallModel.value.isVideo ?? false);
+    // showCallNotification(
+    //     audioCallFormatedTime.value, currentCallModel.value.isVideo ?? false);
   }
 
   Future<void> disconnectCall(bool clearNotification, bool isRejectCall,
@@ -243,42 +236,9 @@ class CallandChatController extends GetxController {
     stopTimer();
 
     if (clearNotification) {
-      cancelNotification();
+      // cancelNotification();
       // AwesomeNotifications().cancel(0);
     }
-  }
-
-  void showCallNotification(String timer, bool isVideoCall) async {
-    // Show a notification to the user
-    AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-            'audio_call_channel', isVideoCall ? "Video Call" : 'Audio Call',
-            channelDescription:
-                'Ongoing ' + (isVideoCall ? "video" : "voice") + ' call ',
-            // importance: Importance.max,
-            // priority: Priority.high,
-            autoCancel: false,
-            ongoing: true,
-            silent: true,
-            showWhen: false,
-            category: AndroidNotificationCategory.call,
-            enableVibration: timer == "",
-            chronometerCountDown: false);
-
-    NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-
-    await flutterLocalNotificationsPlugin.show(
-        0,
-        'Ongoing ' + (isVideoCall ? "video call " : 'voice call ') + timer,
-        'Tap to return to the call',
-        platformChannelSpecifics,
-        payload: jsonEncode(currentCallModel.value.toMap()));
-  }
-
-  Future<void> cancelNotification() async {
-    await flutterLocalNotificationsPlugin
-        .cancel(0); // Cancel notification with ID 0
   }
 
   // initNotification(String liveLink, String studentId, String callId,

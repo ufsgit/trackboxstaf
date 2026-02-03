@@ -4,6 +4,8 @@ import 'package:breffini_staff/model/exam_result_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:breffini_staff/core/theme/color_resources.dart';
 
 class ExamsScreen extends StatefulWidget {
   @override
@@ -15,6 +17,10 @@ class _ExamsScreenState extends State<ExamsScreen> {
   List<ExamResultResponse> _examResults = [];
   bool _isLoading = true;
   String? _errorMessage;
+  DateTime? _startDate;
+  DateTime? _endDate;
+  final TextEditingController _fromDateController = TextEditingController();
+  final TextEditingController _toDateController = TextEditingController();
 
   // TODO: Replace this with actual API call to get teacher's students
   // This is a temporary mapping until backend creates the proper API
@@ -28,6 +34,74 @@ class _ExamsScreenState extends State<ExamsScreen> {
   void initState() {
     super.initState();
     _loadExamResults();
+  }
+
+  @override
+  void dispose() {
+    _fromDateController.dispose();
+    _toDateController.dispose();
+    super.dispose();
+  }
+
+  List<ExamResultResponse> get _filteredResults {
+    if (_startDate == null && _endDate == null) {
+      return _examResults;
+    }
+    return _examResults.where((exam) {
+      if (exam.createdAt == null) return false;
+      final examDate = exam.createdAt!;
+      final start = _startDate != null
+          ? DateTime(_startDate!.year, _startDate!.month, _startDate!.day)
+          : null;
+      final end = _endDate != null
+          ? DateTime(_endDate!.year, _endDate!.month, _endDate!.day, 23, 59, 59)
+          : null;
+
+      if (start != null && examDate.isBefore(start)) return false;
+      if (end != null && examDate.isAfter(end)) return false;
+      return true;
+    }).toList();
+  }
+
+  Future<void> _selectDate(BuildContext context, bool isStart) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF2B3674),
+              onPrimary: Colors.white,
+              onSurface: Color(0xFF2B3674),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+          _fromDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+        } else {
+          _endDate = picked;
+          _toDateController.text = DateFormat('dd-MM-yyyy').format(picked);
+        }
+      });
+    }
+  }
+
+  void _clearFilter() {
+    setState(() {
+      _startDate = null;
+      _endDate = null;
+      _fromDateController.clear();
+      _toDateController.clear();
+    });
   }
 
   Future<void> _loadExamResults() async {
@@ -106,8 +180,9 @@ class _ExamsScreenState extends State<ExamsScreen> {
               : CustomScrollView(
                   slivers: [
                     _buildAppBar(),
+                    SliverToBoxAdapter(child: _buildDateFilter()),
                     SliverToBoxAdapter(child: _buildSummaryHeader()),
-                    _examResults.isEmpty
+                    _filteredResults.isEmpty
                         ? SliverFillRemaining(child: _buildEmptyState())
                         : SliverPadding(
                             padding: EdgeInsets.symmetric(
@@ -115,8 +190,8 @@ class _ExamsScreenState extends State<ExamsScreen> {
                             sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
                                 (context, index) =>
-                                    _buildExamCard(_examResults[index]),
-                                childCount: _examResults.length,
+                                    _buildExamCard(_filteredResults[index]),
+                                childCount: _filteredResults.length,
                               ),
                             ),
                           ),
@@ -127,55 +202,181 @@ class _ExamsScreenState extends State<ExamsScreen> {
 
   Widget _buildAppBar() {
     return SliverAppBar(
-      expandedHeight: 120.h,
-      floating: false,
+      expandedHeight: 80.h,
+      floating: true,
       pinned: true,
-      backgroundColor: const Color(0xFF2B3674),
+      backgroundColor: Colors.white,
       elevation: 0,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: ColorResources.colorgrey500),
+        onPressed: () => Navigator.pop(context),
+      ),
       flexibleSpace: FlexibleSpaceBar(
-        titlePadding: EdgeInsets.only(left: 16.w, bottom: 16.h),
+        titlePadding: EdgeInsets.only(left: 48.w, bottom: 16.h),
         title: Text(
           "Exam Results",
-          style: GoogleFonts.dmSans(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 20.sp,
+          style: GoogleFonts.plusJakartaSans(
+            fontWeight: FontWeight.w700,
+            color: const Color(0xff283B52),
+            fontSize: 16.sp,
           ),
         ),
-        background: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFF2B3674), Color(0xFF4318FF)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      ),
+      // Refresh button removed as requested
+      actions: [],
+    );
+  }
+
+  Widget _buildDateFilter() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 5.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2B3674).withOpacity(0.08),
+            offset: const Offset(0, 4),
+            blurRadius: 16,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.filter_list_rounded,
+                  size: 20.sp, color: const Color(0xFF4318FF)),
+              SizedBox(width: 8.w),
+              Text(
+                "Filter by Date",
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
+                  color: const Color(0xFF2B3674),
                 ),
               ),
+              const Spacer(),
+              if (_startDate != null || _endDate != null)
+                InkWell(
+                  onTap: _clearFilter,
+                  borderRadius: BorderRadius.circular(20.r),
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEEEE),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.close, size: 14.sp, color: Colors.red),
+                        SizedBox(width: 4.w),
+                        Text(
+                          "Clear",
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildModernDateField(
+                    "Start Date", _fromDateController, true),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child:
+                    _buildModernDateField("End Date", _toDateController, false),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModernDateField(
+      String hint, TextEditingController controller, bool isStart) {
+    bool hasValue = controller.text.isNotEmpty;
+    return InkWell(
+      onTap: () => _selectDate(context, isStart),
+      borderRadius: BorderRadius.circular(15.r),
+      child: Container(
+        height: 50.h,
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        decoration: BoxDecoration(
+          color: hasValue ? const Color(0xFFF4F7FE) : const Color(0xFFF4F7FE),
+          borderRadius: BorderRadius.circular(15.r),
+          border: hasValue
+              ? Border.all(color: const Color(0xFF4318FF), width: 1)
+              : Border.all(color: Colors.transparent),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(6.r),
+              decoration: BoxDecoration(
+                color: hasValue ? Colors.white : Colors.white.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.calendar_today_rounded,
+                size: 14.sp,
+                color: hasValue
+                    ? const Color(0xFF4318FF)
+                    : const Color(0xFFA3AED0),
+              ),
             ),
-            Positioned(
-              right: -30,
-              top: -30,
-              child: CircleAvatar(
-                radius: 60.r,
-                backgroundColor: Colors.white.withOpacity(0.05),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (hasValue)
+                    Text(
+                      hint,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 10.sp,
+                        color: const Color(0xFFA3AED0),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  Text(
+                    hasValue ? controller.text : hint,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: hasValue ? 13.sp : 12.sp,
+                      fontWeight: hasValue ? FontWeight.bold : FontWeight.w500,
+                      color: hasValue
+                          ? const Color(0xFF2B3674)
+                          : const Color(0xFFA3AED0),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.refresh, color: Colors.white),
-          onPressed: _loadExamResults,
-        ),
-      ],
     );
   }
 
   Widget _buildSummaryHeader() {
-    int total = _examResults.length;
-    int passed = _examResults.where((e) => e.isPassed).length;
+    int total = _filteredResults.length;
+    int passed = _filteredResults.where((e) => e.isPassed).length;
 
     return Container(
       padding: EdgeInsets.all(20.w),
@@ -399,7 +600,9 @@ class _ExamsScreenState extends State<ExamsScreen> {
           ),
           SizedBox(height: 24.h),
           Text(
-            "No exam results yet",
+            _startDate != null || _endDate != null
+                ? "No exams found for selected dates"
+                : "No exam results yet",
             style: GoogleFonts.dmSans(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
@@ -413,7 +616,13 @@ class _ExamsScreenState extends State<ExamsScreen> {
           ),
           SizedBox(height: 24.h),
           ElevatedButton(
-            onPressed: _loadExamResults,
+            onPressed: () {
+              if (_startDate != null || _endDate != null) {
+                _clearFilter();
+              } else {
+                _loadExamResults();
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4318FF),
               shape: RoundedRectangleBorder(
@@ -469,81 +678,104 @@ class _ExamsScreenState extends State<ExamsScreen> {
   }
 
   void _showExamDetails(ExamResultResponse examResult) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
-        backgroundColor: Colors.white,
-        title: Text(
-          "Detailed Report",
-          style: GoogleFonts.dmSans(
-              fontWeight: FontWeight.bold, color: const Color(0xFF2B3674)),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildDetailItem(
-                  Icons.person_outline, "Student", examResult.studentFullName),
-              if (examResult.courseName != null)
-                _buildDetailItem(
-                    Icons.school_outlined, "Course", examResult.courseName!),
-              if (examResult.examName != null)
-                _buildDetailItem(
-                    Icons.assignment_outlined, "Exam", examResult.examName!),
-              _buildDetailItem(Icons.calendar_today_outlined, "Date",
-                  examResult.formattedDate),
-              SizedBox(height: 20.h),
-              Container(
-                padding: EdgeInsets.all(16.r),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F7FE),
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Column(
-                  children: [
-                    _buildScoreRow("Total Marks", examResult.totalMark),
-                    SizedBox(height: 10.h),
-                    _buildScoreRow("Pass Marks", examResult.passMark),
-                    SizedBox(height: 10.h),
-                    _buildScoreRow("Obtained", examResult.obtainedMark,
-                        isHighlight: true),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Divider(color: Colors.white, thickness: 2),
-                    ),
-                    _buildScoreRow(
-                        "Result", examResult.isPassed ? "PASSED" : "FAILED",
-                        color: examResult.isPassed ? Colors.green : Colors.red),
-                  ],
-                ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: ColorResources.colorgrey500),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: Text(
+              "Detailed Report",
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                color: const Color(0xff283B52),
+                fontSize: 18.sp,
               ),
-              if (examResult.message.isNotEmpty)
-                Padding(
-                  padding: EdgeInsets.only(top: 16.h),
-                  child: Text(
-                    examResult.message,
-                    style: GoogleFonts.dmSans(
-                      fontSize: 12.sp,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.grey[600],
-                    ),
+            ),
+          ),
+          body: SingleChildScrollView(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailItem(Icons.person_outline, "Student",
+                    examResult.studentFullName),
+                if (examResult.courseName != null)
+                  _buildDetailItem(
+                      Icons.school_outlined, "Course", examResult.courseName!),
+                if (examResult.examName != null)
+                  _buildDetailItem(
+                      Icons.assignment_outlined, "Exam", examResult.examName!),
+                _buildDetailItem(Icons.calendar_today_outlined, "Date",
+                    examResult.formattedDate),
+                SizedBox(height: 24.h),
+                Container(
+                  padding: EdgeInsets.all(20.r),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF4F7FE),
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildScoreRow("Total Marks", examResult.totalMark),
+                      SizedBox(height: 12.h),
+                      _buildScoreRow("Pass Marks", examResult.passMark),
+                      SizedBox(height: 12.h),
+                      _buildScoreRow("Obtained", examResult.obtainedMark,
+                          isHighlight: true),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.h),
+                        child: const Divider(color: Colors.white, thickness: 2),
+                      ),
+                      _buildScoreRow(
+                          "Result", examResult.isPassed ? "PASSED" : "FAILED",
+                          color:
+                              examResult.isPassed ? Colors.green : Colors.red),
+                    ],
                   ),
                 ),
-            ],
+                if (examResult.message.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 24.h),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(16.r),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: const Color(0xFFF3F4F6)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Remarks",
+                              style: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.sp,
+                                  color: const Color(0xFF2B3674))),
+                          SizedBox(height: 8.h),
+                          Text(
+                            examResult.message,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14.sp,
+                              color: Colors.grey[600],
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Close",
-                style: GoogleFonts.dmSans(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF4318FF))),
-          ),
-        ],
       ),
     );
   }

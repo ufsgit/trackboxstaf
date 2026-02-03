@@ -376,56 +376,29 @@ Widget buildMessageSection({
                     )
                   :
                   // Send button
-                  (!isMessageTyped &&
-                          !isRecording &&
-                          !isRecordingPaused &&
-                          fileName.isNullOrEmpty())
-                      ? InkWell(
-                          onTap: onTap,
-                          child: CustomIconButton(
-                            height: 38.h,
-                            width: 38.h,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  ColorResources.colorBlue600,
-                                  ColorResources.colorBlue600,
-                                ],
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.mic,
-                              color: ColorResources.colorwhite,
-                              size: 18,
-                            ),
-                          ),
-                        )
-                      : InkWell(
-                          onTap: onTap,
-                          child: CustomIconButton(
-                            height: 38.h,
-                            width: 38.h,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(14),
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  ColorResources.colorBlue600,
-                                  ColorResources.colorBlue600
-                                ],
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.send,
-                              color: ColorResources.colorwhite,
-                              size: 18,
-                            ),
+                  InkWell(
+                      onTap: onTap,
+                      child: CustomIconButton(
+                        height: 38.h,
+                        width: 38.h,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              ColorResources.colorBlue600,
+                              ColorResources.colorBlue600
+                            ],
                           ),
                         ),
+                        child: const Icon(
+                          Icons.send,
+                          color: ColorResources.colorwhite,
+                          size: 18,
+                        ),
+                      ),
+                    ),
               SizedBox(height: 12.h),
             ],
           ),

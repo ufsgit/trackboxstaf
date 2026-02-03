@@ -67,7 +67,7 @@ class _CourseCategoryDetailsScreenState
       },
     );
 
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     _tabController.addListener(_handleTabChange);
   }
 
@@ -256,21 +256,21 @@ class _CourseCategoryDetailsScreenState
                             ),
                           ),
                           const SizedBox(height: 8),
-                          controller.courseInfo[0].description != ''
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  child: ReadMoreWidget(
-                                    description:
-                                        controller.courseInfo[0].description,
-                                  ),
-                                )
-                              : const SizedBox(),
-                          controller.courseInfo[0].description != ''
-                              ? const SizedBox(height: 32)
-                              : const SizedBox(
-                                  height: 8,
-                                ),
+                          // controller.courseInfo[0].description != ''
+                          //     ? Padding(
+                          //         padding: const EdgeInsets.symmetric(
+                          //             horizontal: 16),
+                          //         child: ReadMoreWidget(
+                          //           description:
+                          //               controller.courseInfo[0].description,
+                          //         ),
+                          //       )
+                          //     : const SizedBox(),
+                          // controller.courseInfo[0].description != ''
+                          //     ? const SizedBox(height: 32)
+                          //     : const SizedBox(
+                          //         height: 8,
+                          //       ),
                           if (widget.isFromBatch)
                             StreamBuilder(
                                 stream:
@@ -438,7 +438,7 @@ class _CourseCategoryDetailsScreenState
                             height: 8,
                           ),
                           DefaultTabController(
-                            length: 3,
+                            length: 1,
                             child: Column(
                               children: [
                                 TabBar(
@@ -455,22 +455,6 @@ class _CourseCategoryDetailsScreenState
                                         ),
                                       ),
                                     ),
-                                    Tab(
-                                      child: Text(
-                                        'Library',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                    Tab(
-                                      child: Text(
-                                        'Overview',
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
                                   ],
                                   indicatorColor: ColorResources.colorBlue300,
                                   labelColor: ColorResources.colorBlack,
@@ -478,60 +462,29 @@ class _CourseCategoryDetailsScreenState
                                       ColorResources.colorgrey500,
                                 ),
                                 const SizedBox(height: 10),
-                                Obx(() {
-                                  // double listViewHeight;
-
-                                  // if (tabControllerState.currentIndex.value == 2) {
-                                  //   listViewHeight = Get.height / 2;
-                                  // } else if (tabControllerState.currentIndex.value == 1) {
-                                  //   int itemCount = 6;
-                                  //   listViewHeight = itemCount * 70.0;
-                                  // } else {
-                                  //   int itemCount = controller.courseModulesList.length;
-                                  //   listViewHeight = itemCount * 115.0;
-                                  // }
-
-                                  return SizedBox(
-                                    height: Get.height / 2,
-                                    child: TabBarView(
-                                      controller: _tabController,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16),
-                                          child: CourseModulePage(
-                                            isFromBatch: widget.isFromBatch,
-                                            batchId: widget.batchId,
-                                            badgeIcons: const [
-                                              'assets/images/Bronze.png',
-                                              'assets/images/Silver.png',
-                                              'assets/images/Gold.png',
-                                            ],
-                                            courseId: widget.courseId,
-                                            isLibrary: false,
-                                          ),
+                                SizedBox(
+                                  height: Get.height / 2,
+                                  child: TabBarView(
+                                    controller: _tabController,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                        child: CourseModulePage(
+                                          isFromBatch: widget.isFromBatch,
+                                          batchId: widget.batchId,
+                                          badgeIcons: const [
+                                            'assets/images/Bronze.png',
+                                            'assets/images/Silver.png',
+                                            'assets/images/Gold.png',
+                                          ],
+                                          courseId: widget.courseId,
+                                          isLibrary: false,
                                         ),
-                                        DayCategoryScreen(
-                                          isTab: true,
-                                          isLibrary: true,
-                                          dayId: '0',
-                                          courseId: widget.courseId.toString(),
-                                          moduleId: '0',
-                                          appBarTitle: '',
-                                          isFromBatch: false,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16),
-                                          child: CourseOverviewPage(
-                                            description: controller
-                                                .courseInfo[0].thingsToLearn,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),

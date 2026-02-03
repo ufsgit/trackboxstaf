@@ -120,13 +120,15 @@ class _BatchScreenState extends State<BatchScreen> {
                                   profileController.getBatchesOfTeacher.length,
                               itemBuilder: (context, index) {
                                 return batchOfTeacherWidget(
-                                    badgeColor: (profileController.getBatchesOfTeacher[index].hasBatch == 1 &&
+                                    badgeColor: (profileController
+                                                    .getBatchesOfTeacher[index]
+                                                    .hasBatch ==
+                                                1 &&
                                             profileController
                                                     .getBatchesOfTeacher[index]
                                                     .hasOneOnOne ==
                                                 1)
-                                        ? const Color.fromARGB(
-                                            255, 128, 128, 128)
+                                        ? Colors.transparent
                                         : (profileController.getBatchesOfTeacher[index].hasBatch == 0 &&
                                                 profileController.getBatchesOfTeacher[index].hasOneOnOne ==
                                                     1)
@@ -137,18 +139,19 @@ class _BatchScreenState extends State<BatchScreen> {
                                                         0)
                                                 ? Colors.transparent
                                                 : Colors.transparent,
-                                    badgeText: (profileController.getBatchesOfTeacher[index].hasBatch == 1 &&
+                                    badgeText: (profileController
+                                                    .getBatchesOfTeacher[index]
+                                                    .hasBatch ==
+                                                1 &&
                                             profileController
                                                     .getBatchesOfTeacher[index]
                                                     .hasOneOnOne ==
                                                 1)
-                                        ? 'Live and One-one'
+                                        ? ''
                                         : (profileController.getBatchesOfTeacher[index].hasBatch == 0 &&
-                                                profileController.getBatchesOfTeacher[index].hasOneOnOne ==
-                                                    1)
+                                                profileController.getBatchesOfTeacher[index].hasOneOnOne == 1)
                                             ? 'One-one'
-                                            : (profileController.getBatchesOfTeacher[index].hasBatch == 1 &&
-                                                    profileController.getBatchesOfTeacher[index].hasOneOnOne == 0)
+                                            : (profileController.getBatchesOfTeacher[index].hasBatch == 1 && profileController.getBatchesOfTeacher[index].hasOneOnOne == 0)
                                                 ? ''
                                                 : '',
                                     icon: profileController.getBatchesOfTeacher[index].batchIDs != null ? Icons.group : Icons.person,

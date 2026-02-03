@@ -199,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           .profilePhotoPath.isNotEmpty
                                       ? CachedNetworkImage(
                                           imageUrl:
-                                              "${HttpUrls.imgBaseUrl}${profileController.getTeacher[0].profilePhotoPath}",
+                                              "${HttpUrls.imgBaseUrl}${profileController.getTeacher[0].profilePhotoPath}?t=${DateTime.now().millisecondsSinceEpoch}",
                                           fit: BoxFit.cover,
                                         )
                                       : Image.asset(
@@ -223,6 +223,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   color: ColorResources.colorgrey600,
                                 ),
                               ),
+                              SizedBox(height: 8.h),
+                              if (profileController
+                                          .getTeacher[0].registeredDate !=
+                                      null &&
+                                  profileController
+                                      .getTeacher[0].registeredDate!.isNotEmpty)
+                                Text(
+                                  "Registered Date: ${profileController.getTeacher[0].registeredDate!.length > 10 ? profileController.getTeacher[0].registeredDate!.substring(0, 10) : profileController.getTeacher[0].registeredDate}",
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 12.sp,
+                                    color: ColorResources.colorgrey600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               TextButton(
                                 onPressed: () =>
                                     Get.to(() => const EditProfileScreen()),

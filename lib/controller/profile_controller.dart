@@ -40,6 +40,8 @@ class ProfileController extends GetxController {
       if (response != null && response.statusCode == 200) {
         final responseData = response.data as List<dynamic>;
         final getTeacherList = responseData[0] as List<dynamic>;
+        print(
+            "DEBUG: Raw Teacher Data: ${getTeacherList[0]}"); // Check for Registered_Date
         getTeacher.value = getTeacherList
             .map((result) => TeacherProfileModel.fromJson(result))
             .toList();

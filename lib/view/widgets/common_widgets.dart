@@ -447,14 +447,16 @@ Widget courseProfileWidget(
                       )
                     : SizedBox(),
                 isProfile
-                    ? Text(
-                        expiryDate ?? '',
-                        style: GoogleFonts.plusJakartaSans(
-                          color: ColorResources.colorgrey600,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )
+                    ? (expiryDate != null && expiryDate.isNotEmpty)
+                        ? Text(
+                            expiryDate,
+                            style: GoogleFonts.plusJakartaSans(
+                              color: ColorResources.colorgrey600,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        : SizedBox()
                     : SizedBox(),
               ],
             ),

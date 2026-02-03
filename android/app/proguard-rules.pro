@@ -49,3 +49,13 @@
 -dontwarn org.conscrypt.Conscrypt
 -dontwarn org.conscrypt.OpenSSLProvider
 -dontwarn org.w3c.dom.bootstrap.DOMImplementationRegistry
+
+# Video Player Rules
+-keep class io.flutter.plugins.videoplayer.** { *; }
+-keep class com.google.android.exoplayer2.** { *; }
+
+# Push Notification Rules
+-keep class com.google.firebase.messaging.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+-keep class com.google.firebase.** { *; }

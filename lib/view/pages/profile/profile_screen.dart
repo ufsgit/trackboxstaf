@@ -23,6 +23,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:intl/intl.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -224,19 +225,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                               ),
                               SizedBox(height: 8.h),
-                              if (profileController
-                                          .getTeacher[0].registeredDate !=
-                                      null &&
-                                  profileController
-                                      .getTeacher[0].registeredDate!.isNotEmpty)
-                                Text(
-                                  "Registered Date: ${profileController.getTeacher[0].registeredDate!.length > 10 ? profileController.getTeacher[0].registeredDate!.substring(0, 10) : profileController.getTeacher[0].registeredDate}",
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12.sp,
-                                    color: ColorResources.colorgrey600,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                              // DEBUG: Always show this to verify the data
+                              Builder(
+                                builder: (context) {
+                                  final regDate = profileController
+                                      .getTeacher[0].registeredDate;
+                                  log("DEBUG Profile Screen - Registered Date: $regDate");
+
+                                  if (regDate == null || regDate.isEmpty) {
+                                    return Text(
+                                      "Registered Date: Not Available",
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12.sp,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    );
+                                  }
+
+                                  String formattedDate = '';
+                                  try {
+                                    final dateTime = DateTime.parse(regDate);
+                                    formattedDate = DateFormat('dd MMM yyyy')
+                                        .format(dateTime);
+                                  } catch (e) {
+                                    log("Date parsing failed: $e");
+                                    formattedDate = regDate.length > 10
+                                        ? regDate.substring(0, 10)
+                                        : regDate;
+                                  }
+
+                                  return Text(
+                                    "Registered Date: $formattedDate",
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 12.sp,
+                                      color: ColorResources.colorgrey600,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  );
+                                },
+                              ),
+                              SizedBox(height: 8.h),
                               TextButton(
                                 onPressed: () =>
                                     Get.to(() => const EditProfileScreen()),

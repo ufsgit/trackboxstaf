@@ -42,11 +42,14 @@ class ProfileController extends GetxController {
         final getTeacherList = responseData[0] as List<dynamic>;
         print(
             "DEBUG: Raw Teacher Data: ${getTeacherList[0]}"); // Check for Registered_Date
+        print(
+            "DEBUG: Registered_Date value: ${getTeacherList[0]['Registered_Date']}");
         getTeacher.value = getTeacherList
             .map((result) => TeacherProfileModel.fromJson(result))
             .toList();
         print('teacher details');
         print(getTeacher);
+        print("DEBUG: Model registeredDate: ${getTeacher[0].registeredDate}");
         PrefUtils().setTeacherName(getTeacher[0].firstName);
         PrefUtils().setProfileUrl(getTeacher[0].profilePhotoPath);
         PrefUtils().setMeetLink(getTeacher[0].gMeetLink ?? '');

@@ -92,31 +92,33 @@ class _CourseOngoingScreenState extends State<CourseOngoingScreen> {
                                     ));
                               },
                               child: courseProfileWidget(
-                                  showBatchEnd: studentCourseController.studentCourseList[index].batchID != 0
-                                      ? true
-                                      : false,
+                                  showBatchEnd:
+                                      studentCourseController.studentCourseList[index].batchID != 0
+                                          ? true
+                                          : false,
                                   isProfile: true,
-                                  batchTeacher: studentCourseController.studentCourseList[index].batchID != 0
+                                  batchTeacher: studentCourseController.studentCourseList[index].batchID != 0 &&
+                                          studentCourseController
+                                              .studentCourseList[index]
+                                              .batchTeacher
+                                              .trim()
+                                              .isNotEmpty
                                       ? 'Teacher : ${studentCourseController.studentCourseList[index].batchTeacher}'
                                       : '',
-                                  oneOnOneTeacher: studentCourseController
+                                  oneOnOneTeacher: studentCourseController.studentCourseList[index].batchID == 0 &&
+                                          studentCourseController
                                               .studentCourseList[index]
-                                              .batchID ==
-                                          0
+                                              .oneToOneTeacher
+                                              .trim()
+                                              .isNotEmpty
                                       ? 'Teacher : ${studentCourseController.studentCourseList[index].oneToOneTeacher}'
                                       : '',
                                   courseName: studentCourseController
                                       .studentCourseList[index].courseName,
                                   batchName: "",
-                                  image: HttpUrls.imgBaseUrl +
-                                      studentCourseController
-                                          .studentCourseList[index].imagePath,
-                                  batchStart: studentCourseController.studentCourseList[index].batchID != 0
-                                      ? "Batch start : ${formatDate(studentCourseController.studentCourseList[index].batchStart)}"
-                                      : 'One on one',
-                                  batchEnd: studentCourseController.studentCourseList[index].batchID != 0
-                                      ? "Batch End : ${formatDate(studentCourseController.studentCourseList[index].batchEnd)}"
-                                      : 'Batch End : ',
+                                  image: HttpUrls.imgBaseUrl + studentCourseController.studentCourseList[index].imagePath,
+                                  batchStart: studentCourseController.studentCourseList[index].batchID != 0 ? "Batch start : ${formatDate(studentCourseController.studentCourseList[index].batchStart)}" : 'One on one',
+                                  batchEnd: studentCourseController.studentCourseList[index].batchID != 0 ? "Batch End : ${formatDate(studentCourseController.studentCourseList[index].batchEnd)}" : 'Batch End : ',
                                   expiryDate: ''),
                             ),
                           ),

@@ -35,9 +35,6 @@ class _TeacherChatHistoryScreenState extends State<TeacherChatHistoryScreen> {
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      try {
-        Permission.notification.request();
-      } catch (_) {}
       _fetchData();
     });
   }

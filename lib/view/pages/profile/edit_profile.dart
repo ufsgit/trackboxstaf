@@ -223,6 +223,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ? imagePath
                       : pController.getTeacher[0].profilePhotoPath,
                   profilePhotoName: pController.getTeacher[0].profilePhotoName,
+                  registeredDate: pController.getTeacher[0].registeredDate,
                 );
                 await pController.saveEditedProfile(teacherProfile, context);
 

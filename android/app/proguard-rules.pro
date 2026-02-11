@@ -59,3 +59,8 @@
 -keep class com.google.android.gms.** { *; }
 
 -keep class com.google.firebase.** { *; }
+
+# Flutter Local Notifications
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-keep class androidx.core.app.NotificationCompat** { *; }
+

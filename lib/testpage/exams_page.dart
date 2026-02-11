@@ -1,6 +1,10 @@
 import 'package:breffini_staff/core/utils/pref_utils.dart';
 import 'package:breffini_staff/http/exam_service.dart';
 import 'package:breffini_staff/model/exam_result_model.dart';
+import 'package:breffini_staff/http/http_requests.dart'; // Added
+import 'package:breffini_staff/http/http_urls.dart'; // Added
+import 'package:breffini_staff/model/get_student_timeslot_model.dart'; // Added
+import 'package:breffini_staff/core/widgets/rubiks_cube_loader.dart'; // Added logic for loader
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -25,10 +29,10 @@ class _ExamsScreenState extends State<ExamsScreen> {
   // TODO: Replace this with actual API call to get teacher's students
   // This is a temporary mapping until backend creates the proper API
   // Map teacher IDs to their assigned student IDs
-  final Map<String, List<int>> _teacherStudents = {
-    "65": [335, 336], // Teacher ID 65's students
-    // Add more teacher-student mappings as needed
-  };
+  // final Map<String, List<int>> _teacherStudents = {
+  //   "65": [335, 336], // Teacher ID 65's students
+  //   // Add more teacher-student mappings as needed
+  // };
 
   @override
   void initState() {
@@ -125,7 +129,20 @@ class _ExamsScreenState extends State<ExamsScreen> {
       print("DEBUG: Fetching exam results for teacher ID: $teacherId");
 
       // Get student IDs for this teacher
-      final studentIds = _teacherStudents[teacherId] ?? [];
+      List<int> studentIds = [];
+
+      // Try fetching dynamically first
+      try {
+        studentIds = await _fetchStudentsForTeacher();
+        print("DEBUG: Dynamically fetched ${studentIds.length} students");
+      } catch (e) {
+        print("DEBUG: Dynamic fetch failed, falling back to empty list: $e");
+      }
+
+      // Fallback to hardcoded map if dynamic fetch returns empty (optional, for backward compatibility)
+      // if (studentIds.isEmpty) {
+      //   studentIds = _teacherStudents[teacherId] ?? [];
+      // }
 
       if (studentIds.isEmpty) {
         setState(() {
@@ -166,6 +183,43 @@ class _ExamsScreenState extends State<ExamsScreen> {
         _isLoading = false;
       });
       print("DEBUG: Error loading exam results: $e");
+    }
+  }
+
+  Future<List<int>> _fetchStudentsForTeacher() async {
+    try {
+      final response = await HttpRequest.httpGetRequest(
+        endPoint: HttpUrls.getStudentsTimeSlot,
+        showLoader: false,
+      );
+
+      print(
+          "DEBUG: _fetchStudentsForTeacher Response Code: ${response?.statusCode}");
+
+      if (response != null && response.statusCode == 200) {
+        final responseData = response.data;
+        print(
+            "DEBUG: _fetchStudentsForTeacher Raw Data Type: ${responseData.runtimeType}");
+
+        if (responseData is List<dynamic>) {
+          final students = responseData
+              .map((json) => GetStudentTimeSlotsModel.fromJson(json))
+              .map((student) => student.studentId)
+              .toSet() // Use Set to avoid duplicates
+              .toList();
+          print("DEBUG: _fetchStudentsForTeacher Parsed IDs: $students");
+          return students;
+        } else {
+          print(
+              "DEBUG: responseData is not a List: ${responseData.runtimeType}");
+        }
+      } else {
+        print("DEBUG: API Error or Null Response: ${response?.statusMessage}");
+      }
+      return [];
+    } catch (e) {
+      print("DEBUG: Error fetching students for teacher: $e");
+      return [];
     }
   }
 
@@ -595,24 +649,31 @@ class _ExamsScreenState extends State<ExamsScreen> {
                     offset: const Offset(0, 10)),
               ],
             ),
-            child: Icon(Icons.assignment_outlined,
-                size: 70.sp, color: const Color(0xFFA3AED0)),
+            // Replaced static icon with 3D Rubik's Loader
+            child: const RubiksCubeLoader(
+              size: 80,
+              key: ValueKey('rubiks_loader_v2'), // Force state recreation
+            ),
           ),
           SizedBox(height: 24.h),
           Text(
             _startDate != null || _endDate != null
                 ? "No exams found for selected dates"
-                : "No exam results yet",
+                : "No Exam Results Found", // Updated text
             style: GoogleFonts.dmSans(
                 fontWeight: FontWeight.bold,
                 fontSize: 18.sp,
                 color: const Color(0xFF2B3674)),
           ),
           SizedBox(height: 8.h),
-          Text(
-            "Start by assigning exams to your students.",
-            style: GoogleFonts.dmSans(fontSize: 14.sp, color: Colors.grey[500]),
-            textAlign: TextAlign.center,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32.w),
+            child: Text(
+              "It looks like your students haven't taken any exams yet, or the results are currently being processed/uploaded. Please check back later.",
+              style:
+                  GoogleFonts.dmSans(fontSize: 14.sp, color: Colors.grey[500]),
+              textAlign: TextAlign.center,
+            ),
           ),
           SizedBox(height: 24.h),
           ElevatedButton(

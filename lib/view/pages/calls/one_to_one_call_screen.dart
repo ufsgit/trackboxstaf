@@ -169,18 +169,19 @@ class _OneToOneCallScreenState extends State<OneToOneCallScreen> {
                                                 height: 16.h,
                                               ),
                                               InkWell(
-                                                // onTap: () {
-                                                //   Get.to(() => ProfileViewPage(
-                                                //       courseId:
-                                                //           slot.courseId.toString(),
-                                                //       profileUrl: HttpUrls.imgBaseUrl +
-                                                //           slot.imageUrl,
-                                                //       studentName:
-                                                //           '${slot.firstName} ${slot.lastName}',
-                                                //       contactDetails: slot.courseName,
-                                                //       studentId:
-                                                //           slot.studentId.toString()));
-                                                // },
+                                                onTap: () {
+                                                  Get.to(() => ProfileViewPage(
+                                                      courseId: slot.courseId
+                                                          .toString(),
+                                                      profileUrl:
+                                                          '${HttpUrls.imgBaseUrl}${slot.imageUrl}',
+                                                      studentName:
+                                                          '${slot.firstName} ${slot.lastName}',
+                                                      contactDetails:
+                                                          slot.courseName,
+                                                      studentId: slot.studentId
+                                                          .toString()));
+                                                },
                                                 child: callStudentWidget(
                                                   chatIcon: Icons
                                                       .chat_bubble_outline_rounded,

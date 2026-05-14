@@ -130,12 +130,10 @@ void showCustomBottomSheet(BuildContext context) {
           ],
         ),
       );
-          ],
-        ),
-      );
     },
   );
 }
+
 
 void showCustomBottomSheet2(BuildContext context) {
   showModalBottomSheet(
